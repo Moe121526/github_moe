@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--组件扫描-->
+    <context:component-scan base-package="com.demo.controller"/>
+    <!--mvc注解驱动-->
+<!--    <mvc:annotation-driven/>-->
+    <!--配置静态资源映射-->
+    <mvc:resources mapping="/statics/**" location="/statics/"/>
+
+    <!--配置多视图解析器-->
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="favorParameter" value="true"/>
+        <property name="defaultContentType" value="text/html"/>
+        <property name="mediaTypes">
+            <map>
+                <entry key="html" value="text/html;charset=UTF-8"/>
+                <entry key="json" value="application/json;charset=UTF-8"/>
+                <entry key="xml" value="application/xml;charset=UTF-8"/>
+            </map>
+        </property>
+        <property name="viewResolvers">
+            <list>
+                <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                    <property name="prefix" value="/WEB-INF/jsp/"/>
+                    <property name="suffix" value=".jsp"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!--全局异常-->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <!--异常类型：RuntimeExceptiion 页面：error 。页面内需要使用${exception.message}来显示错误信息提示 -->
+                <prop key="java.lang.RuntimeException">error</prop>
+                <!--其他异常类型，可以按照上面的规则进行定义-->
+            </props>
+        </property>
+    </bean>
+
+    <!--文件上传解析器-->
+    <bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--         5*1024bit = 5kb , 5*1024*1024= 5m  -->
+        <!--简化写法: 5*1000*1000 -->
+        <property name="maxUploadSize" value="5000000"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+
+    <!--mvc注解驱动，配置下支持的媒体类型中JSON格式的字符格式要求必须是UTF-8 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!--消息转换器，避免Java对象转实体类时，时间类型数据的问题-->
+    <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>application/html;charset=UTF-8</value>
+                <value>application/json</value>
+            </list>
+        </property>
+        <property name="features">
+            <list>
+                <!--输出Date的日期转换器-->
+                <value>WriteDateUseDateFormat</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--配置系统拦截器-->
+<!--    <mvc:interceptors>-->
+<!--        <mvc:interceptor>-->
+<!--            <mvc:mapping path="/system/**"/>-->
+<!--            <bean class="cn.smbms.interceptor.SysInterceptor"/>-->
+<!--        </mvc:interceptor>-->
+<!--    </mvc:interceptors>-->
+
+</beans>
